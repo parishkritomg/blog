@@ -362,13 +362,30 @@ const CommentItem = ({
               Reply
             </button>
             {(isAdmin || myComments[comment.id] || (user && user.id === comment.user_id)) && (
-              <button 
-                onClick={() => handleDelete(comment.id)}
-                className="text-xs font-medium text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors opacity-0 group-hover:opacity-100"
-              >
-                <Trash2 size={12} />
-                Delete
-              </button>
+              <div className="relative" ref={menuRef}>
+                <button 
+                  onClick={() => setShowMenu(!showMenu)}
+                  className={`p-1 hover:bg-gray-100 rounded-full transition-all ${showMenu ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                  aria-label="More options"
+                >
+                  <MoreVertical size={14} className="text-gray-500" />
+                </button>
+                
+                {showMenu && (
+                  <div className="absolute left-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-lg py-1 z-20 w-32 animate-in fade-in zoom-in-95 duration-100">
+                    <button 
+                      onClick={() => {
+                        handleDelete(comment.id);
+                        setShowMenu(false);
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                    >
+                      <Trash2 size={12} />
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
