@@ -6,6 +6,7 @@ import { CommentSection } from '@/components/blog/CommentSection';
 import { ShareButtons } from '@/components/blog/ShareButtons';
 import { BookmarkButton } from '@/components/blog/BookmarkButton';
 import { ViewCounter } from '@/components/blog/ViewCounter';
+// @ts-ignore
 import { FloatingCommentButton } from '@/components/blog/FloatingCommentButton';
 
 import { Database } from '@/types/supabase';
