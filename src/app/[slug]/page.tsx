@@ -181,7 +181,7 @@ export default async function BlogPost({ params }: Props) {
   }
 
   const jsonLd = {
-    '@context': 'https://schema.org',
+    '@context': 'https://schema.org', 
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.excerpt,
