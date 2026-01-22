@@ -9,11 +9,14 @@ export async function GET(request: Request) {
     // Dynamic params
     const title = searchParams.get('title') || 'Blog Post';
     const excerpt = searchParams.get('excerpt') || '';
-    const image = searchParams.get('image');
+    const imageParam = searchParams.get('image');
+    // Ensure image URL is absolute for ImageResponse
+    const image = imageParam ? new URL(imageParam, request.url).toString() : null;
 
     // Load avatar image
-    // Note: To reduce edge function size, we use an absolute URL instead of bundling the file
-    const avatarUrl = 'https://blog.parishkrit.com.np/favicon_me.png'; 
+    // Use the request URL to resolve the absolute path to the favicon
+    // This works for both local development, preview deployments, and production
+    const avatarUrl = new URL('/favicon_me.png', request.url).toString(); 
 
     return new ImageResponse(
       (
