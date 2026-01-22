@@ -181,7 +181,7 @@ export default async function BlogPost({ params }: Props) {
   }
 
   const jsonLd = {
-    '@context': 'https://schema.org', 
+    '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.excerpt,
@@ -191,6 +191,39 @@ export default async function BlogPost({ params }: Props) {
       name: 'Parishkrit Bastakoti',
     },
   };
+
+  const pollPlacement = poll?.placement || 'bottom';
+
+  const renderPoll = () => (
+    poll && (
+      <div className="mb-16">
+        <Poll
+          pollId={poll.id}
+          question={poll.question}
+          options={poll.options as any}
+          initialVotes={pollVotes}
+          userVote={userVote}
+          user={user}
+          voterAvatars={voterAvatars}
+        />
+      </div>
+    )
+  );
+
+  let contentBefore = post.content;
+  let contentAfter = '';
+
+  if (pollPlacement === 'middle') {
+    const parts = post.content.split('</p>');
+    // Remove empty last element if exists
+    if (parts[parts.length - 1].trim() === '') parts.pop();
+    
+    if (parts.length >= 2) {
+      const mid = Math.ceil(parts.length / 2);
+      contentBefore = parts.slice(0, mid).join('</p>') + '</p>';
+      contentAfter = parts.slice(mid).join('</p>') + '</p>';
+    }
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-12">
@@ -223,24 +256,23 @@ export default async function BlogPost({ params }: Props) {
           </div>
         </header>
 
+        {pollPlacement === 'top' && renderPoll()}
+
         <div 
           className="prose prose-lg prose-gray max-w-none mb-16"
-          dangerouslySetInnerHTML={{ __html: post.content }} 
+          dangerouslySetInnerHTML={{ __html: contentBefore }} 
         />
         
-        {poll && (
-          <div className="mb-16">
-            <Poll
-              pollId={poll.id}
-              question={poll.question}
-              options={poll.options as any}
-              initialVotes={pollVotes}
-              userVote={userVote}
-              user={user}
-              voterAvatars={voterAvatars}
-            />
-          </div>
+        {pollPlacement === 'middle' && renderPoll()}
+
+        {contentAfter && (
+           <div 
+            className="prose prose-lg prose-gray max-w-none mb-16"
+            dangerouslySetInnerHTML={{ __html: contentAfter }} 
+          />
         )}
+        
+        {pollPlacement === 'bottom' && renderPoll()}
 
         <div id="comments">
           <CommentSection postId={post.id} initialComments={comments} />
