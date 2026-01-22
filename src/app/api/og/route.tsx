@@ -1,9 +1,6 @@
 import { ImageResponse } from 'next/og';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
-// Switch to Node.js runtime to allow file system access
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function GET(request: Request) {
   try {
@@ -13,17 +10,25 @@ export async function GET(request: Request) {
     const title = searchParams.get('title') || 'Blog Post';
     const excerpt = searchParams.get('excerpt') || '';
     const imageParam = searchParams.get('image');
+    
     // Ensure image URL is absolute for ImageResponse
+    // If it's already absolute, new URL() handles it. If relative, it uses request.url as base.
     const image = imageParam ? new URL(imageParam, request.url).toString() : null;
 
     // Load avatar image
-    let avatarBuffer: Buffer | null = null;
+    // We fetch it and convert to ArrayBuffer for Satori
+    // We use the deployment URL or fallback to the site URL
+    let avatarBuffer: ArrayBuffer | null = null;
     try {
-      const avatarPath = join(process.cwd(), 'public', 'favicon_me.png');
-      avatarBuffer = readFileSync(avatarPath);
-    } catch (err) {
-      console.error('Failed to load avatar:', err);
-      // Continue without avatar
+        const avatarUrl = new URL('/favicon_me.png', request.url);
+        const res = await fetch(avatarUrl);
+        if (res.ok) {
+            avatarBuffer = await res.arrayBuffer();
+        } else {
+            console.error('Failed to fetch avatar:', res.status, res.statusText);
+        }
+    } catch (e) {
+        console.error('Error fetching avatar:', e);
     }
 
     return new ImageResponse(
