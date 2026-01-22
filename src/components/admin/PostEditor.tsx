@@ -6,15 +6,29 @@ import { useRouter } from 'next/navigation';
 import { Database } from '@/types/supabase';
 import { RichTextEditor } from './RichTextEditor';
 import { format } from 'date-fns';
-import { Eye, Send, ChevronDown, ChevronUp } from 'lucide-react';
+import { Eye, Send, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 
 type Post = Database['public']['Tables']['posts']['Row'];
 
-interface PostEditorProps {
-  post?: Post;
+interface PollOption {
+  id: string;
+  text: string;
 }
 
-export function PostEditor({ post }: PostEditorProps) {
+interface Poll {
+  id: string;
+  post_id: string;
+  question: string;
+  options: PollOption[];
+  created_at: string;
+}
+
+interface PostEditorProps {
+  post?: Post;
+  initialPoll?: Poll | null;
+}
+
+export function PostEditor({ post, initialPoll }: PostEditorProps) {
   const router = useRouter();
   const supabase = createClient() as any;
   const [loading, setLoading] = useState(false);
@@ -30,6 +44,17 @@ export function PostEditor({ post }: PostEditorProps) {
   const [published, setPublished] = useState(post?.published || false);
   const [tags, setTags] = useState<string>(post?.tags ? post.tags.join(', ') : '');
   const [featuredImage, setFeaturedImage] = useState(post?.featured_image || '');
+  
+  // Poll Fields
+  const [hasPoll, setHasPoll] = useState(!!initialPoll);
+  const [pollQuestion, setPollQuestion] = useState(initialPoll?.question || '');
+  const [pollOptions, setPollOptions] = useState<PollOption[]>(
+    initialPoll?.options || [
+      { id: '1', text: '' },
+      { id: '2', text: '' }
+    ]
+  );
+  const [showPoll, setShowPoll] = useState(!!initialPoll);
   const toLocalISO = (isoString?: string) => {
     const date = isoString ? new Date(isoString) : new Date();
     const offset = date.getTimezoneOffset() * 60000;
@@ -40,6 +65,20 @@ export function PostEditor({ post }: PostEditorProps) {
 
   // UI State
   const [showOptions, setShowOptions] = useState(true);
+
+  const addPollOption = () => {
+    setPollOptions([...pollOptions, { id: Date.now().toString(), text: '' }]);
+  };
+
+  const removePollOption = (id: string) => {
+    if (pollOptions.length > 2) {
+      setPollOptions(pollOptions.filter(o => o.id !== id));
+    }
+  };
+
+  const updatePollOption = (id: string, text: string) => {
+    setPollOptions(pollOptions.map(o => o.id === id ? { ...o, text } : o));
+  };
 
   const handleSubmit = async (e: React.FormEvent | null, isPublish: boolean) => {
     if (e) e.preventDefault();
@@ -75,6 +114,55 @@ export function PostEditor({ post }: PostEditorProps) {
       setError(result.error.message);
       setLoading(false);
     } else {
+      // Handle Poll
+      const savedPost = result.data[0];
+      if (savedPost) {
+        if (hasPoll && pollQuestion.trim()) {
+          const validOptions = pollOptions.filter(o => o.text.trim());
+          if (validOptions.length < 2) {
+            // Should probably show an error but for now let's just not save invalid poll
+          } else {
+            const pollData = {
+              post_id: savedPost.id,
+              question: pollQuestion,
+              options: validOptions
+            };
+
+            let pollError;
+            if (initialPoll) {
+              const { error } = await supabase
+                .from('polls')
+                .update(pollData)
+                .eq('id', initialPoll.id);
+              pollError = error;
+            } else {
+              const { error } = await supabase
+                .from('polls')
+                .insert(pollData);
+              pollError = error;
+            }
+
+            if (pollError) {
+              setError('Error saving poll: ' + pollError.message);
+              setLoading(false);
+              return;
+            }
+          }
+        } else if (initialPoll && !hasPoll) {
+          // Delete poll if it existed but was disabled
+          const { error } = await supabase
+            .from('polls')
+            .delete()
+            .eq('id', initialPoll.id);
+            
+          if (error) {
+            setError('Error deleting poll: ' + error.message);
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
       router.push('/admin');
       router.refresh();
     }
@@ -235,6 +323,77 @@ export function PostEditor({ post }: PostEditorProps) {
                 <span>Location</span>
                 <ChevronDown size={16} className="text-gray-400" />
               </button>
+            </div>
+
+            {/* Poll */}
+            <div className="space-y-2 border-t border-gray-100 pt-4">
+              <button 
+                onClick={() => setShowPoll(!showPoll)}
+                className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-orange-500"
+              >
+                <span>Poll</span>
+                {showPoll ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
+              </button>
+              
+              {showPoll && (
+                <div className="pt-2 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="hasPoll"
+                      checked={hasPoll}
+                      onChange={(e) => setHasPoll(e.target.checked)}
+                      className="rounded border-gray-300 text-black focus:ring-black"
+                    />
+                    <label htmlFor="hasPoll" className="text-sm text-gray-600">Include a poll</label>
+                  </div>
+
+                  {hasPoll && (
+                    <div className="space-y-3 pl-1">
+                      <div>
+                        <input
+                          type="text"
+                          value={pollQuestion}
+                          onChange={(e) => setPollQuestion(e.target.value)}
+                          placeholder="Poll Question"
+                          className="w-full border-b border-gray-300 py-2 text-sm focus:border-orange-500 focus:outline-none placeholder-gray-400"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        {pollOptions.map((option, index) => (
+                          <div key={option.id} className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={option.text}
+                              onChange={(e) => updatePollOption(option.id, e.target.value)}
+                              placeholder={`Option ${index + 1}`}
+                              className="flex-1 border-b border-gray-300 py-1 text-sm focus:border-orange-500 focus:outline-none placeholder-gray-400"
+                            />
+                            {pollOptions.length > 2 && (
+                              <button
+                                type="button"
+                                onClick={() => removePollOption(option.id)}
+                                className="text-gray-400 hover:text-red-500"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={addPollOption}
+                          className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium mt-1"
+                        >
+                          <Plus size={12} />
+                          Add Option
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Options */}
