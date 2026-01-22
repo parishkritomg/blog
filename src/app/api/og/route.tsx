@@ -1,6 +1,9 @@
 import { ImageResponse } from 'next/og';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
-export const runtime = 'edge';
+// Switch to Node.js runtime to allow file system access
+export const runtime = 'nodejs';
 
 export async function GET(request: Request) {
   try {
@@ -14,12 +17,14 @@ export async function GET(request: Request) {
     const image = imageParam ? new URL(imageParam, request.url).toString() : null;
 
     // Load avatar image
-    // Fetch the image manually to ensure it loads in Edge runtime
-    // and pass the ArrayBuffer to Satori
-    const avatarUrl = new URL('/favicon_me.png', request.url);
-    const avatarResponse = await fetch(avatarUrl);
-    if (!avatarResponse.ok) throw new Error('Failed to load avatar');
-    const avatarBuffer = await avatarResponse.arrayBuffer();
+    let avatarBuffer: Buffer | null = null;
+    try {
+      const avatarPath = join(process.cwd(), 'public', 'favicon_me.png');
+      avatarBuffer = readFileSync(avatarPath);
+    } catch (err) {
+      console.error('Failed to load avatar:', err);
+      // Continue without avatar
+    }
 
     return new ImageResponse(
       (
@@ -77,16 +82,18 @@ export async function GET(request: Request) {
                  {/* Author info or Brand */}
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
-                        src={avatarBuffer as any}
-                        alt="Parishkrit Bastakoti"
-                        style={{ 
-                            width: '40px', 
-                            height: '40px', 
-                            borderRadius: '50%', 
-                            marginRight: '12px',
-                        }} 
-                    />
+                    {avatarBuffer && (
+                      <img 
+                          src={avatarBuffer as any}
+                          alt="Parishkrit Bastakoti"
+                          style={{ 
+                              width: '40px', 
+                              height: '40px', 
+                              borderRadius: '50%', 
+                              marginRight: '12px',
+                          }} 
+                      />
+                    )}
                     <div style={{ fontSize: 24, fontWeight: '600', color: 'black' }}>
                         Parishkrit Bastakoti
                     </div>
