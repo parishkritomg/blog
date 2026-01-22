@@ -44,7 +44,7 @@ export function Poll({ pollId, question, options, initialVotes, userVote: initia
         poll_id: pollId,
         user_id: user.id,
         option_id: optionId
-      });
+      } as any);
 
     if (error) {
       alert('Error voting: ' + error.message);
