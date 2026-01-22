@@ -11,6 +11,11 @@ export async function GET(request: Request) {
     const excerpt = searchParams.get('excerpt') || '';
     const image = searchParams.get('image');
 
+    // Load avatar image
+    const avatarData = await fetch(new URL('../../../../public/favicon_me.png', import.meta.url)).then(
+      (res) => res.arrayBuffer()
+    );
+
     return new ImageResponse(
       (
         <div
