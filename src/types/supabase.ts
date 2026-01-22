@@ -129,13 +129,66 @@ export interface Database {
           value?: string
           created_at?: string
         }
+      },
+      polls: {
+        Row: {
+          id: string
+          post_id: string
+          question: string
+          options: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          question: string
+          options: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          question?: string
+          options?: Json
+          created_at?: string
+        }
+      },
+      poll_votes: {
+        Row: {
+          id: string
+          poll_id: string
+          user_id: string
+          option_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          poll_id: string
+          user_id: string
+          option_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          poll_id?: string
+          user_id?: string
+          option_id?: string
+          created_at?: string
+        }
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_poll_voter_avatars: {
+        Args: {
+          p_poll_id: string
+        }
+        Returns: {
+          avatar_url: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
