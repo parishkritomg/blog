@@ -40,6 +40,12 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon_me.png',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Parishkrit Bastakoti | Blog',
+    description: 'Personal blog of Parishkrit Bastakoti. Thoughts on software, design, and life.',
+    images: ['/favicon_me.png'],
+  },
 };
 
 export default function RootLayout({
