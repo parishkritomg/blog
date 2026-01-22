@@ -377,7 +377,7 @@ const CommentItem = ({
               <div className="relative" ref={menuRef}>
                 <button 
                   onClick={() => setShowMenu(!showMenu)}
-                  className={`p-1 hover:bg-gray-100 rounded-full transition-all ${showMenu ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                  className={`p-1 hover:bg-gray-100 rounded-full transition-all ${showMenu ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'}`}
                   aria-label="More options"
                 >
                   <MoreVertical size={14} className="text-gray-500" />
