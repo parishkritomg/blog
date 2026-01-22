@@ -170,7 +170,7 @@ export default async function BlogPost({ params }: Props) {
         .select('option_id')
         .eq('poll_id', poll.id)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
       
       if (myVote) {
         userVote = myVote.option_id;
