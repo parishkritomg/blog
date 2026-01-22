@@ -20,6 +20,7 @@ interface Poll {
   post_id: string;
   question: string;
   options: PollOption[];
+  placement?: 'top' | 'bottom' | 'middle';
   created_at: string;
 }
 
@@ -54,6 +55,7 @@ export function PostEditor({ post, initialPoll }: PostEditorProps) {
       { id: '2', text: '' }
     ]
   );
+  const [pollPlacement, setPollPlacement] = useState<'top' | 'bottom' | 'middle'>(initialPoll?.placement || 'bottom');
   const [showPoll, setShowPoll] = useState(!!initialPoll);
   const toLocalISO = (isoString?: string) => {
     const date = isoString ? new Date(isoString) : new Date();
@@ -125,7 +127,8 @@ export function PostEditor({ post, initialPoll }: PostEditorProps) {
             const pollData = {
               post_id: savedPost.id,
               question: pollQuestion,
-              options: validOptions
+              options: validOptions,
+              placement: pollPlacement
             };
 
             let pollError;
@@ -358,6 +361,19 @@ export function PostEditor({ post, initialPoll }: PostEditorProps) {
                           placeholder="Poll Question"
                           className="w-full border-b border-gray-300 py-2 text-sm focus:border-orange-500 focus:outline-none placeholder-gray-400"
                         />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-medium text-gray-500 uppercase block mb-1">Placement</label>
+                        <select
+                          value={pollPlacement}
+                          onChange={(e) => setPollPlacement(e.target.value as 'top' | 'bottom' | 'middle')}
+                          className="w-full border-b border-gray-300 py-2 text-sm focus:border-orange-500 focus:outline-none bg-transparent"
+                        >
+                          <option value="top">Top (Before Content)</option>
+                          <option value="middle">Middle (Within Content)</option>
+                          <option value="bottom">Bottom (After Content)</option>
+                        </select>
                       </div>
                       
                       <div className="space-y-2">
