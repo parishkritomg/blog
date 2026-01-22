@@ -13,6 +13,7 @@ import { FloatingCommentButton } from '@/components/blog/FloatingCommentButton';
 import { Database } from '@/types/supabase';
 
 type Post = Database['public']['Tables']['posts']['Row'];
+type Poll = Database['public']['Tables']['polls']['Row'];
 
 // Force dynamic rendering if we want to ensure fresh data, 
 // or use revalidate for ISR (e.g., revalidate = 60).
@@ -135,7 +136,7 @@ export default async function BlogPost({ params }: Props) {
     .from('polls')
     .select('*')
     .eq('post_id', post.id)
-    .single();
+    .maybeSingle();
 
   let pollVotes: Record<string, number> = {};
   let userVote = null;
