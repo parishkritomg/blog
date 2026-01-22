@@ -14,9 +14,12 @@ export async function GET(request: Request) {
     const image = imageParam ? new URL(imageParam, request.url).toString() : null;
 
     // Load avatar image
-    // Use the request URL to resolve the absolute path to the favicon
-    // This works for both local development, preview deployments, and production
-    const avatarUrl = new URL('/favicon_me.png', request.url).toString(); 
+    // Fetch the image manually to ensure it loads in Edge runtime
+    // and pass the ArrayBuffer to Satori
+    const avatarUrl = new URL('/favicon_me.png', request.url);
+    const avatarResponse = await fetch(avatarUrl);
+    if (!avatarResponse.ok) throw new Error('Failed to load avatar');
+    const avatarBuffer = await avatarResponse.arrayBuffer();
 
     return new ImageResponse(
       (
@@ -75,7 +78,7 @@ export async function GET(request: Request) {
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
-                        src={avatarUrl}
+                        src={avatarBuffer as any}
                         alt="Parishkrit Bastakoti"
                         style={{ 
                             width: '40px', 
