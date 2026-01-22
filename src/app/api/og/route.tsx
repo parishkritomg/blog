@@ -21,7 +21,14 @@ export async function GET(request: Request) {
     let avatarBuffer: ArrayBuffer | null = null;
     try {
         const avatarUrl = new URL('/favicon_me.png', request.url);
-        const res = await fetch(avatarUrl);
+        
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000); // 2s timeout
+        
+        const res = await fetch(avatarUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
         if (res.ok) {
             avatarBuffer = await res.arrayBuffer();
         } else {
@@ -86,8 +93,8 @@ export async function GET(request: Request) {
             >
                  {/* Author info or Brand */}
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    {avatarBuffer && (
+                    {avatarBuffer ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img 
                           src={avatarBuffer as any}
                           alt="Parishkrit Bastakoti"
@@ -98,6 +105,24 @@ export async function GET(request: Request) {
                               marginRight: '12px',
                           }} 
                       />
+                    ) : (
+                      <div
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '50%',
+                          backgroundColor: 'black',
+                          color: 'white',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginRight: '12px',
+                          fontSize: '20px',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        PB
+                      </div>
                     )}
                     <div style={{ fontSize: 24, fontWeight: '600', color: 'black' }}>
                         Parishkrit Bastakoti
