@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Parishkrit Bastakoti | Blog',
     description: 'Personal blog of Parishkrit Bastakoti. Thoughts on software, design, and life.',
-    images: ['/favicon_me.png'],
+    images: ['https://blog.parishkrit.com.np/favicon_me.png'],
   },
 };
 
