@@ -6,6 +6,7 @@ import { CommentSection } from '@/components/blog/CommentSection';
 import { ShareButtons } from '@/components/blog/ShareButtons';
 import { BookmarkButton } from '@/components/blog/BookmarkButton';
 import { ViewCounter } from '@/components/blog/ViewCounter';
+import { FloatingCommentButton } from '@/components/blog/FloatingCommentButton';
 
 import { Database } from '@/types/supabase';
 
@@ -69,7 +70,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
-  const ogImageUrl = `${siteUrl}/api/og?title=${encodeURIComponent(post.title)}&excerpt=${encodeURIComponent(post.excerpt || '')}&image=${encodeURIComponent(post.featured_image || '')}`;
+  
+  // Prefer the production domain if available to ensure Twitter card validation works
+  const productionUrl = 'https://blog.parishkrit.com.np';
+  const baseUrl = siteUrl.includes('localhost') ? siteUrl : productionUrl;
+  
+  const ogImageUrl = `${baseUrl}/api/og?title=${encodeURIComponent(post.title)}&excerpt=${encodeURIComponent(post.excerpt || '')}&image=${encodeURIComponent(post.featured_image || '')}`;
 
   return {
     title: post.title,
@@ -170,8 +176,12 @@ export default async function BlogPost({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: post.content }} 
         />
         
-        <CommentSection postId={post.id} initialComments={comments} />
+        <div id="comments">
+          <CommentSection postId={post.id} initialComments={comments} />
+        </div>
       </article>
+      
+      <FloatingCommentButton />
     </div>
   );
 }
