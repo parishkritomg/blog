@@ -161,7 +161,7 @@ export default async function BlogPost({ params }: Props) {
     // @ts-ignore
     const { data: avatars } = await supabase.rpc('get_poll_voter_avatars', { p_poll_id: poll.id });
     if (avatars) {
-      voterAvatars = avatars.map((a: any) => a.avatar_url);
+      voterAvatars = (avatars as any[]).map((a: any) => a.avatar_url);
     }
 
     if (user) {
