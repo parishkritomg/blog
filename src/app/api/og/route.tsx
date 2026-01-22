@@ -66,21 +66,17 @@ export async function GET(request: Request) {
             >
                  {/* Author info or Brand */}
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div style={{ 
-                        width: '40px', 
-                        height: '40px', 
-                        borderRadius: '50%', 
-                        backgroundColor: '#f3f4f6', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        marginRight: '12px',
-                        fontSize: '20px',
-                        fontWeight: 'bold',
-                        color: '#374151'
-                    }}>
-                        P
-                    </div>
+                    {/* @ts-ignore */}
+                    <img 
+                        src={avatarData}
+                        alt="Parishkrit Bastakoti"
+                        style={{ 
+                            width: '40px', 
+                            height: '40px', 
+                            borderRadius: '50%', 
+                            marginRight: '12px',
+                        }} 
+                    />
                     <div style={{ fontSize: 24, fontWeight: '600', color: 'black' }}>
                         Parishkrit Bastakoti
                     </div>
