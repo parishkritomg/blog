@@ -136,6 +136,7 @@ export interface Database {
           post_id: string
           question: string
           options: Json
+          placement: 'top' | 'bottom' | 'middle'
           created_at: string
         }
         Insert: {
@@ -143,6 +144,7 @@ export interface Database {
           post_id: string
           question: string
           options: Json
+          placement?: 'top' | 'bottom' | 'middle'
           created_at?: string
         }
         Update: {
@@ -150,6 +152,7 @@ export interface Database {
           post_id?: string
           question?: string
           options?: Json
+          placement?: 'top' | 'bottom' | 'middle'
           created_at?: string
         }
       },
