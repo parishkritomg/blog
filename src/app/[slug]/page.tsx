@@ -6,6 +6,7 @@ import { CommentSection } from '@/components/blog/CommentSection';
 import { ShareButtons } from '@/components/blog/ShareButtons';
 import { BookmarkButton } from '@/components/blog/BookmarkButton';
 import { ViewCounter } from '@/components/blog/ViewCounter';
+import { Poll } from '@/components/blog/Poll';
 // @ts-ignore
 import { FloatingCommentButton } from '@/components/blog/FloatingCommentButton';
 
@@ -129,6 +130,50 @@ export default async function BlogPost({ params }: Props) {
     isBookmarked = !!bookmark;
   }
 
+  // Fetch Poll
+  const { data: poll } = await supabase
+    .from('polls')
+    .select('*')
+    .eq('post_id', post.id)
+    .single();
+
+  let pollVotes: Record<string, number> = {};
+  let userVote = null;
+  let voterAvatars: string[] = [];
+
+  if (poll) {
+    const { data: allVotes } = await supabase
+      .from('poll_votes')
+      .select('option_id')
+      .eq('poll_id', poll.id);
+      
+    if (allVotes) {
+      pollVotes = allVotes.reduce((acc: Record<string, number>, vote: any) => {
+        acc[vote.option_id] = (acc[vote.option_id] || 0) + 1;
+        return acc;
+      }, {});
+    }
+
+    // Fetch voter avatars using RPC
+    const { data: avatars } = await supabase.rpc('get_poll_voter_avatars', { p_poll_id: poll.id });
+    if (avatars) {
+      voterAvatars = avatars.map((a: any) => a.avatar_url);
+    }
+
+    if (user) {
+      const { data: myVote } = await supabase
+        .from('poll_votes')
+        .select('option_id')
+        .eq('poll_id', poll.id)
+        .eq('user_id', user.id)
+        .single();
+      
+      if (myVote) {
+        userVote = myVote.option_id;
+      }
+    }
+  }
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -177,6 +222,20 @@ export default async function BlogPost({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: post.content }} 
         />
         
+        {poll && (
+          <div className="mb-16">
+            <Poll
+              pollId={poll.id}
+              question={poll.question}
+              options={poll.options as any}
+              initialVotes={pollVotes}
+              userVote={userVote}
+              user={user}
+              voterAvatars={voterAvatars}
+            />
+          </div>
+        )}
+
         <div id="comments">
           <CommentSection postId={post.id} initialComments={comments} />
         </div>
