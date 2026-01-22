@@ -132,11 +132,13 @@ export default async function BlogPost({ params }: Props) {
   }
 
   // Fetch Poll
-  const { data: poll } = await supabase
+  const { data: pollData } = await supabase
     .from('polls')
     .select('*')
     .eq('post_id', post.id)
     .maybeSingle();
+
+  const poll = pollData as Poll | null;
 
   let pollVotes: Record<string, number> = {};
   let userVote = null;
