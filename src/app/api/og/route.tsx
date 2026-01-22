@@ -71,8 +71,9 @@ export async function GET(request: Request) {
             >
                  {/* Author info or Brand */}
                 <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
-                        src={avatarData as any}
+                        src={avatarUrl}
                         alt="Parishkrit Bastakoti"
                         style={{ 
                             width: '40px', 
