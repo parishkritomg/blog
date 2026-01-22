@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Parishkrit Bastakoti",
     description: "Personal blog of Parishkrit Bastakoti.",
-    url: "https://parishkrit.com", // Placeholder
+    url: "https://blog.parishkrit.com.np", // Placeholder
     siteName: "Parishkrit Bastakoti",
     locale: "en_US",
     type: "website",
