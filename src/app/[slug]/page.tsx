@@ -165,13 +165,15 @@ export default async function BlogPost({ params }: Props) {
     }
 
     if (user) {
-      const { data: myVote } = await supabase
+      const { data: myVoteData } = await supabase
         .from('poll_votes')
         .select('option_id')
         .eq('poll_id', poll.id)
         .eq('user_id', user.id)
         .maybeSingle();
       
+      const myVote = myVoteData as { option_id: string } | null;
+
       if (myVote) {
         userVote = myVote.option_id;
       }
