@@ -11,7 +11,7 @@ import { createClient } from '@/lib/supabase/client';
 import { createClient as createServerClient } from '@supabase/supabase-js';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://parishkrit.com'; // Change this to your actual domain
+  const baseUrl = 'https://blog.parishkrit.com.np'; 
 
   // Handle missing environment variables gracefully during build
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
