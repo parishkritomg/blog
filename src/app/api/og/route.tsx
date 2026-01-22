@@ -71,9 +71,8 @@ export async function GET(request: Request) {
             >
                  {/* Author info or Brand */}
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {/* @ts-ignore */}
                     <img 
-                        src={avatarData}
+                        src={avatarData as any}
                         alt="Parishkrit Bastakoti"
                         style={{ 
                             width: '40px', 
