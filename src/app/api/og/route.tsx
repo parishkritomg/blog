@@ -12,9 +12,8 @@ export async function GET(request: Request) {
     const image = searchParams.get('image');
 
     // Load avatar image
-    const avatarData = await fetch(new URL('../../../../public/favicon_me.png', import.meta.url)).then(
-      (res) => res.arrayBuffer()
-    );
+    // Note: To reduce edge function size, we use an absolute URL instead of bundling the file
+    const avatarUrl = 'https://blog.parishkrit.com.np/favicon_me.png'; 
 
     return new ImageResponse(
       (
