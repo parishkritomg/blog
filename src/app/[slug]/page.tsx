@@ -238,12 +238,12 @@ export default async function BlogPost({ params }: Props) {
             {post.title}
           </h1>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-100 pb-6 gap-4">
-            <div className="flex items-center text-gray-500 text-sm">
-              <span>{format(new Date(post.created_at), 'MMMM d, yyyy')}</span>
+            <div className="flex flex-wrap items-center text-gray-500 text-sm gap-y-2">
+              <span className="whitespace-nowrap">{format(new Date(post.created_at), 'MMMM d, yyyy')}</span>
               <span className="mx-2">·</span>
-              <span>Parishkrit Bastakoti</span>
+              <span className="whitespace-nowrap">Parishkrit Bastakoti</span>
               <span className="mx-2">·</span>
-              <ViewCounter postId={post.id} initialViews={post.view_count || 0} />
+              <ViewCounter postId={post.id} initialViews={post.view_count || 0} className="whitespace-nowrap" />
             </div>
             <div className="flex items-center gap-4">
               <BookmarkButton 
