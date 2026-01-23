@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { format } from 'date-fns';
-import { Trash2, Reply, MessageSquare, MoreVertical } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { Trash2, Reply, MessageCircle, MoreHorizontal } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 
@@ -47,7 +47,7 @@ export function CommentSection({ postId, initialComments }: CommentSectionProps)
       setUser(user);
       
       if (user) {
-        // Simple admin check by email (should match your admin email)
+        // Simple admin check by email
         const isAdminUser = user.email === 'parishkrit2061@gmail.com';
         setIsAdmin(isAdminUser);
         
@@ -72,12 +72,11 @@ export function CommentSection({ postId, initialComments }: CommentSectionProps)
 
   const handleSubmit = async (e: React.FormEvent, parentId: string | null = null) => {
     e.preventDefault();
-    if (!user) return; // Should not happen if UI is correct
+    if (!user) return;
 
     setIsSubmitting(true);
     setMessage(null);
 
-    // Generate a random secret for this comment (legacy support for local delete)
     const userSecret = crypto.randomUUID();
 
     // Try inserting with avatar_url first
@@ -93,7 +92,6 @@ export function CommentSection({ postId, initialComments }: CommentSectionProps)
       user_secret: userSecret,
     }).select().single();
 
-    // If that fails (likely due to missing column), try without avatar_url
     if (error) {
       console.warn('Initial comment submission failed, retrying without avatar_url...', error);
       const result = await supabase.from('comments').insert({
@@ -115,7 +113,6 @@ export function CommentSection({ postId, initialComments }: CommentSectionProps)
       console.error('Error submitting comment:', error);
       setMessage({ type: 'error', text: 'Failed to submit comment. Please try again.' });
     } else {
-      // Add new comment to local state immediately
       const newComment = {
         id: data.id,
         name,
@@ -129,7 +126,6 @@ export function CommentSection({ postId, initialComments }: CommentSectionProps)
       
       setComments([...comments, newComment]);
 
-      // Save secret to local storage
       const newMyComments = { ...myComments, [data.id]: userSecret };
       setMyComments(newMyComments);
       localStorage.setItem('my_comments', JSON.stringify(newMyComments));
@@ -145,7 +141,6 @@ export function CommentSection({ postId, initialComments }: CommentSectionProps)
   const handleDelete = async (commentId: string) => {
     if (!confirm('Are you sure you want to delete this comment?')) return;
 
-    // Get secret if available
     const secret = myComments[commentId];
 
     const { error } = await supabase.rpc('delete_comment', {
@@ -159,7 +154,6 @@ export function CommentSection({ postId, initialComments }: CommentSectionProps)
     } else {
       setComments(comments.filter(c => c.id !== commentId && c.parent_id !== commentId));
       
-      // Cleanup local storage
       if (myComments[commentId]) {
         const { [commentId]: removed, ...rest } = myComments;
         setMyComments(rest);
@@ -168,75 +162,88 @@ export function CommentSection({ postId, initialComments }: CommentSectionProps)
     }
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(n => n[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase();
-  };
-
   // State alias fix for form
   const commentState = comment; 
 
   const rootComments = comments.filter(c => !c.parent_id);
 
   return (
-    <div className="mt-16 pt-10 border-t border-gray-100">
-      <div className="flex items-center gap-2 mb-8">
-        <MessageSquare size={20} className="text-gray-900" />
-        <h3 className="text-xl font-semibold text-gray-900">
-          Comments ({comments.length})
+    <div className="mt-24 pt-12 border-t border-gray-100 max-w-3xl mx-auto">
+      <div className="flex items-baseline justify-between mb-10">
+        <h3 className="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+          Discussion
+          <span className="bg-gray-100 text-gray-600 text-sm font-medium px-2.5 py-0.5 rounded-full">
+            {comments.length}
+          </span>
         </h3>
       </div>
 
       {message && (
-        <div className={`p-4 mb-8 rounded text-sm ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+        <div className={`p-4 mb-8 rounded-lg text-sm font-medium ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
           {message.text}
         </div>
       )}
 
       {/* Main Comment Form */}
-      <div className="mb-12">
+      <div className="mb-16">
         {!user ? (
-          <div className="bg-gray-50 p-6 rounded-lg text-center py-6">
-            <p className="text-gray-600 mb-4 text-sm">Please login to leave a comment.</p>
+          <div className="bg-gray-50 border border-gray-100 p-8 rounded-2xl text-center">
+            <h4 className="font-semibold text-gray-900 mb-2">Join the conversation</h4>
+            <p className="text-gray-500 mb-6 text-sm">Log in to share your thoughts with the community.</p>
             <a 
               href={`/login?next=${pathname}`}
-              className="inline-block bg-black text-white px-6 py-2 text-sm font-medium rounded hover:bg-gray-800 transition-colors"
+              className="inline-flex items-center justify-center bg-black text-white px-8 py-2.5 text-sm font-medium rounded-full hover:bg-gray-800 transition-all hover:scale-105"
             >
-              Login / Sign Up
+              Login to Comment
             </a>
           </div>
         ) : !replyTo ? (
-          <form onSubmit={(e) => handleSubmit(e, null)} className="space-y-4">
-            <div className="relative">
-              <textarea
-                required
-                value={commentState}
-                onChange={(e) => setComment(e.target.value)}
-                className="w-full bg-white border border-gray-200 p-4 text-sm rounded-lg focus:outline-none focus:border-black transition-colors resize-none min-h-[120px]"
-                placeholder={`Comment as ${name}...`}
-              />
-              <div className="absolute bottom-3 right-3">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-black text-white px-4 py-1.5 text-xs font-medium rounded hover:bg-gray-800 disabled:opacity-50 transition-colors"
-                >
-                  {isSubmitting ? 'Posting...' : 'Post Comment'}
-                </button>
+          <form onSubmit={(e) => handleSubmit(e, null)} className="relative group">
+            <div className="absolute top-0 left-0 -ml-12 hidden md:block">
+              <div className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden">
+                {user.user_metadata?.avatar_url ? (
+                  <Image 
+                    src={user.user_metadata.avatar_url} 
+                    alt={name} 
+                    width={32} 
+                    height={32} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-400">
+                    {name.charAt(0)}
+                  </div>
+                )}
               </div>
+            </div>
+            <textarea
+              required
+              value={commentState}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full bg-transparent border-b-2 border-gray-100 p-4 pl-0 text-base placeholder:text-gray-400 focus:outline-none focus:border-black transition-colors resize-none min-h-[100px]"
+              placeholder="What are your thoughts?"
+            />
+            <div className="flex justify-end mt-4 opacity-100 transition-opacity">
+              <button
+                type="submit"
+                disabled={isSubmitting || !commentState.trim()}
+                className="bg-black text-white px-6 py-2 text-sm font-medium rounded-full hover:bg-gray-800 disabled:opacity-50 disabled:hover:bg-black transition-all"
+              >
+                {isSubmitting ? 'Posting...' : 'Post Comment'}
+              </button>
             </div>
           </form>
         ) : null}
       </div>
 
       {/* Comment List */}
-      <div className="space-y-2">
+      <div className="space-y-10">
         {rootComments.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No comments yet. Be the first to share your thoughts.</p>
+          <div className="text-center py-12 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+            <MessageCircle className="w-12 h-12 text-gray-200 mx-auto mb-3" />
+            <p className="text-gray-500 font-medium">No comments yet</p>
+            <p className="text-gray-400 text-sm mt-1">Start the conversation by leaving a comment.</p>
+          </div>
         ) : (
           rootComments.map((c) => (
             <CommentItem 
@@ -322,44 +329,51 @@ const CommentItem = ({
   };
 
   return (
-    <div className={`${isReply ? 'ml-3 md:ml-12 mt-4' : 'mt-8'}`}>
-      <div className="flex gap-3 md:gap-4 group">
-        <div className="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-100 flex items-center justify-center text-sm font-medium text-gray-600 overflow-hidden relative">
-          {comment.avatar_url ? (
-            <Image 
-              src={comment.avatar_url} 
-              alt={comment.name}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            getInitials(comment.name)
-          )}
+    <div className={`group ${isReply ? 'mt-6 pl-4 md:pl-0' : 'mt-8'}`}>
+      <div className="flex gap-4">
+        <div className="flex-shrink-0">
+          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-sm font-bold text-gray-500 overflow-hidden relative border border-gray-100">
+            {comment.avatar_url ? (
+              <Image 
+                src={comment.avatar_url} 
+                alt={comment.name}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              getInitials(comment.name)
+            )}
+          </div>
         </div>
-        <div className="flex-1">
-          <div className="bg-gray-50 p-4 rounded-lg rounded-tl-none">
-            <div className="flex items-start justify-between mb-2 gap-2">
-              <span className="font-medium text-sm text-gray-900 break-words min-w-0">
-                {comment.name}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <div className="flex items-center gap-1">
+                <span className="font-semibold text-gray-900 text-sm">
+                  {comment.name}
+                </span>
                 {comment.isAdmin && (
-                  <span className="inline-flex align-middle ml-1">
-                    <Image 
-                      src="/verification_badge.png" 
-                      alt="Verified Admin" 
-                      width={14} 
-                      height={14} 
-                    />
-                  </span>
+                  <Image
+                    src="/verification_badge.png"
+                    alt="Verified"
+                    width={16}
+                    height={16}
+                    className="w-4 h-4"
+                  />
                 )}
-              </span>
-              <span className="text-xs text-gray-400 whitespace-nowrap shrink-0 mt-0.5">
-                {format(new Date(comment.created_at), 'MMM d, yyyy')}
+              </div>
+              <span className="text-gray-300 text-xs">•</span>
+              <span className="text-xs text-gray-500">
+                {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
               </span>
             </div>
-            <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">{comment.comment}</p>
           </div>
           
-          <div className="flex items-center gap-4 mt-2 ml-1">
+          <div className="text-gray-800 text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+            {comment.comment}
+          </div>
+          
+          <div className="flex items-center gap-4 mt-3">
             <button 
               onClick={() => {
                 if (!user) {
@@ -368,23 +382,24 @@ const CommentItem = ({
                 }
                 setReplyTo(replyTo === comment.id ? null : comment.id);
               }}
-              className="text-xs font-medium text-gray-500 hover:text-black flex items-center gap-1 transition-colors"
+              className="text-xs font-semibold text-gray-500 hover:text-black flex items-center gap-1.5 transition-colors"
             >
-              <Reply size={12} />
+              <Reply size={14} className="stroke-[2.5]" />
               Reply
             </button>
+
             {(isAdmin || myComments[comment.id] || (user && user.id === comment.user_id)) && (
               <div className="relative" ref={menuRef}>
                 <button 
                   onClick={() => setShowMenu(!showMenu)}
-                  className={`p-1 hover:bg-gray-100 rounded-full transition-all ${showMenu ? 'opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'}`}
+                  className="p-1 hover:bg-gray-100 rounded transition-colors text-gray-400 hover:text-gray-600"
                   aria-label="More options"
                 >
-                  <MoreVertical size={14} className="text-gray-500" />
+                  <MoreHorizontal size={16} />
                 </button>
                 
                 {showMenu && (
-                  <div className="absolute left-0 mt-1 bg-white border border-gray-100 shadow-xl rounded-lg py-1 z-20 w-32 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="absolute left-0 mt-1 bg-white border border-gray-100 shadow-lg rounded-lg py-1 z-20 w-32 animate-in fade-in zoom-in-95 duration-100">
                     <button 
                       onClick={() => {
                         handleDelete(comment.id);
@@ -403,62 +418,62 @@ const CommentItem = ({
 
           {/* Reply Form */}
           {replyTo === comment.id && (
-            <div className="mt-4 ml-2 md:ml-4 pl-3 md:pl-4 border-l-2 border-gray-100 animate-in fade-in slide-in-from-top-2">
-              <div className="flex items-center justify-between mb-2">
-                <h5 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Reply to {comment.name}</h5>
-                <button
-                  type="button"
-                  onClick={() => setReplyTo(null)}
-                  className="text-xs text-gray-400 hover:text-black"
-                >
-                  Cancel
-                </button>
-              </div>
-              <form onSubmit={(e) => handleSubmit(e, comment.id)} className="space-y-3">
-                <div className="relative">
-                  <textarea
-                    required
-                    value={commentValue}
-                    onChange={(e) => setCommentValue(e.target.value)}
-                    placeholder={`Reply as ${userName}...`}
-                    rows={3}
-                    className="w-full bg-white border border-gray-200 p-3 text-sm rounded-lg focus:outline-none focus:border-black transition-colors resize-none"
-                  />
-                  <div className="absolute bottom-2 right-2">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="bg-black text-white px-3 py-1 text-xs font-medium rounded hover:bg-gray-800 disabled:opacity-50 transition-colors"
-                    >
-                      {isSubmitting ? 'Sending...' : 'Reply'}
-                    </button>
-                  </div>
+            <div className="mt-6 mb-8 animate-in fade-in slide-in-from-top-2">
+              <form onSubmit={(e) => handleSubmit(e, comment.id)} className="relative">
+                <textarea
+                  required
+                  value={commentValue}
+                  onChange={(e) => setCommentValue(e.target.value)}
+                  placeholder={`Reply to ${comment.name}...`}
+                  rows={3}
+                  autoFocus
+                  className="w-full bg-gray-50 border-0 rounded-xl p-4 text-sm focus:ring-2 focus:ring-black/5 transition-all resize-none"
+                />
+                <div className="flex items-center justify-end gap-2 mt-3">
+                  <button
+                    type="button"
+                    onClick={() => setReplyTo(null)}
+                    className="px-4 py-2 text-xs font-medium text-gray-500 hover:text-black transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-black text-white px-4 py-2 text-xs font-medium rounded-full hover:bg-gray-800 disabled:opacity-50 transition-all"
+                  >
+                    {isSubmitting ? 'Sending...' : 'Reply'}
+                  </button>
                 </div>
               </form>
             </div>
           )}
 
-          {/* Nested Replies */}
-          {replies.map(reply => (
-            <CommentItem 
-              key={reply.id} 
-              comment={reply} 
-              isReply={true}
-              allComments={allComments}
-              user={user}
-              isAdmin={isAdmin}
-              myComments={myComments}
-              replyTo={replyTo}
-              setReplyTo={setReplyTo}
-              handleSubmit={handleSubmit}
-              handleDelete={handleDelete}
-              commentValue={commentValue}
-              setCommentValue={setCommentValue}
-              isSubmitting={isSubmitting}
-              userName={userName}
-              pathname={pathname}
-            />
-          ))}
+          {/* Nested Replies Container */}
+          {replies.length > 0 && (
+            <div className="mt-4 border-l-2 border-gray-100 pl-4 md:pl-6 space-y-6">
+              {replies.map(reply => (
+                <CommentItem 
+                  key={reply.id} 
+                  comment={reply} 
+                  isReply={true}
+                  allComments={allComments}
+                  user={user}
+                  isAdmin={isAdmin}
+                  myComments={myComments}
+                  replyTo={replyTo}
+                  setReplyTo={setReplyTo}
+                  handleSubmit={handleSubmit}
+                  handleDelete={handleDelete}
+                  commentValue={commentValue}
+                  setCommentValue={setCommentValue}
+                  isSubmitting={isSubmitting}
+                  userName={userName}
+                  pathname={pathname}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
