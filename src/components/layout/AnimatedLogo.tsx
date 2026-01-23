@@ -22,7 +22,7 @@ export const AnimatedLogo = () => {
           alt="Logo"
           width={24}
           height={24}
-          className="rounded-full"
+          className="rounded-full" 
         />
       </motion.div>
       
