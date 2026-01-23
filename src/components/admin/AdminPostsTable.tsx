@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { Database } from '@/types/supabase';
 import { ViewCounter } from '@/components/blog/ViewCounter';
 import { DeletePostButton } from './DeletePostButton';
-import { CheckSquare, Square, Trash2, Eye, EyeOff } from 'lucide-react';
+import { CheckSquare, Square, Trash2, Eye, EyeOff, Pencil, Search } from 'lucide-react';
 
 type Post = Database['public']['Tables']['posts']['Row'];
 
@@ -19,14 +19,25 @@ interface AdminPostsTableProps {
 export function AdminPostsTable({ initialPosts }: AdminPostsTableProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const supabase = createClient() as any;
 
+  const filteredPosts = initialPosts.filter(post => {
+    const query = searchQuery.toLowerCase();
+    return (
+      post.title.toLowerCase().includes(query) ||
+      post.slug.toLowerCase().includes(query) ||
+      (post.excerpt && post.excerpt.toLowerCase().includes(query)) ||
+      (post.tags && post.tags.some(tag => tag.toLowerCase().includes(query)))
+    );
+  });
+
   const toggleAll = () => {
-    if (selectedIds.size === initialPosts.length) {
+    if (selectedIds.size === filteredPosts.length && filteredPosts.length > 0) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(initialPosts.map(p => p.id)));
+      setSelectedIds(new Set(filteredPosts.map(p => p.id)));
     }
   };
 
@@ -74,10 +85,22 @@ export function AdminPostsTable({ initialPosts }: AdminPostsTableProps) {
     setLoading(false);
   };
 
-  const isAllSelected = initialPosts.length > 0 && selectedIds.size === initialPosts.length;
+  const isAllSelected = filteredPosts.length > 0 && selectedIds.size === filteredPosts.length;
 
   return (
     <div className="space-y-4">
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search posts by title, slug, or keywords..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+        />
+      </div>
+
       {/* Bulk Actions Bar */}
       {selectedIds.size > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white shadow-xl border border-gray-200 rounded-full px-6 py-3 flex items-center gap-4 z-50 animate-in slide-in-from-bottom-4 fade-in duration-200">
@@ -137,14 +160,14 @@ export function AdminPostsTable({ initialPosts }: AdminPostsTableProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {!initialPosts?.length ? (
+              {!filteredPosts?.length ? (
                 <tr>
                   <td colSpan={6} className="px-4 md:px-6 py-8 text-center text-gray-500">
-                    No posts found.
+                    {initialPosts.length === 0 ? "No posts found." : "No posts match your search."}
                   </td>
                 </tr>
               ) : (
-                initialPosts.map((post) => {
+                filteredPosts.map((post) => {
                   const isSelected = selectedIds.has(post.id);
                   return (
                     <tr key={post.id} className={`transition-colors ${isSelected ? 'bg-blue-50/50 hover:bg-blue-50' : 'hover:bg-gray-50'}`}>
@@ -156,7 +179,7 @@ export function AdminPostsTable({ initialPosts }: AdminPostsTableProps) {
                           {isSelected ? <CheckSquare className="w-5 h-5 text-blue-600" /> : <Square className="w-5 h-5" />}
                         </button>
                       </td>
-                      <td className="px-4 md:px-6 py-4 font-medium max-w-[200px] md:max-w-none truncate" title={post.title}>
+                      <td className="px-4 md:px-6 py-4 font-medium max-w-[200px] md:max-w-[400px] truncate" title={post.title}>
                         <Link href={`/admin/posts/${post.id}`} className="hover:text-blue-600 transition-colors">
                           {post.title}
                         </Link>
@@ -176,17 +199,20 @@ export function AdminPostsTable({ initialPosts }: AdminPostsTableProps) {
                           showIcon={false}
                         />
                       </td>
-                      <td className="px-4 md:px-6 py-4 text-gray-500">
+                      <td className="px-4 md:px-6 py-4 text-gray-500 whitespace-nowrap">
                         {format(new Date(post.created_at), 'MMM d, yyyy')}
                       </td>
-                      <td className="px-4 md:px-6 py-4 text-right space-x-4 whitespace-nowrap">
-                        <Link 
-                          href={`/admin/posts/${post.id}`} 
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          Edit
-                        </Link>
-                        <DeletePostButton postId={post.id} />
+                      <td className="px-4 md:px-6 py-4 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-3">
+                          <Link 
+                            href={`/admin/posts/${post.id}`} 
+                            className="text-indigo-600 hover:text-indigo-900 transition-colors"
+                            title="Edit Post"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Link>
+                          <DeletePostButton postId={post.id} />
+                        </div>
                       </td>
                     </tr>
                   );
