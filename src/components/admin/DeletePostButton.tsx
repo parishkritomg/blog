@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Trash2 } from 'lucide-react';
 
 export function DeletePostButton({ postId }: { postId: string }) {
   const [loading, setLoading] = useState(false);
@@ -27,9 +28,14 @@ export function DeletePostButton({ postId }: { postId: string }) {
     <button 
       onClick={handleDelete} 
       disabled={loading}
-      className="text-red-600 hover:text-red-900 disabled:opacity-50"
+      className="inline-flex items-center justify-center text-red-600 hover:text-red-900 disabled:opacity-50 transition-colors"
+      title="Delete Post"
     >
-      {loading ? '...' : 'Delete'}
+      {loading ? (
+        <span className="w-4 h-4 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
+      ) : (
+        <Trash2 className="w-4 h-4" />
+      )}
     </button>
   );
 }
