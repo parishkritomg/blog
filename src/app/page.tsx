@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { PostItem } from '@/components/blog/PostItem';
 import { Database } from '@/types/supabase';
-import { Sparkles, Clock } from 'lucide-react';
+import { TrendingUp, Clock } from 'lucide-react';
 
 type Post = Database['public']['Tables']['posts']['Row'];
 
@@ -56,12 +56,27 @@ export default async function Home() {
     );
   }
 
-  const topReadPosts = [...posts]
+  const trendingPosts = [...posts]
     .sort((a, b) => (b.view_count || 0) - (a.view_count || 0))
     .slice(0, 3);
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-12 space-y-16">
+      {/* Trending Section */}
+      {trendingPosts.length > 0 && (posts.some(p => (p.view_count || 0) > 0)) && (
+        <section className="space-y-6">
+          <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+            <TrendingUp className="w-5 h-5 text-red-500" />
+            <h2 className="text-xl font-bold tracking-tight text-gray-900">Trending</h2>
+          </div>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {trendingPosts.map((post) => (
+              <PostItem key={`trending-${post.id}`} post={post} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* Latest Section */}
       <section className="space-y-6">
         <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
@@ -74,21 +89,6 @@ export default async function Home() {
           ))}
         </div>
       </section>
-
-      {/* Top Read Section */}
-      {topReadPosts.length > 0 && (posts.some(p => (p.view_count || 0) > 0)) && (
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-            <Sparkles className="w-5 h-5 text-yellow-500" />
-            <h2 className="text-xl font-bold tracking-tight text-gray-900">Top Read</h2>
-          </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {topReadPosts.map((post) => (
-              <PostItem key={`top-${post.id}`} post={post} />
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 }
