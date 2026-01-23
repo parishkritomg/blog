@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { PostItem } from '@/components/blog/PostItem';
+import { TrendingPostItem } from '@/components/blog/TrendingPostItem';
 import { Database } from '@/types/supabase';
 import { TrendingUp, Clock } from 'lucide-react';
 
@@ -71,7 +72,7 @@ export default async function Home() {
           </div>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {trendingPosts.map((post) => (
-              <PostItem key={`trending-${post.id}`} post={post} />
+              <TrendingPostItem key={`trending-${post.id}`} post={post} />
             ))}
           </div>
         </section>
