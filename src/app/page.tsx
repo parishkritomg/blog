@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { PostItem } from '@/components/blog/PostItem';
-import { TrendingPostItem } from '@/components/blog/TrendingPostItem';
+import { TrendingSection } from '@/components/blog/TrendingSection';
 import { Database } from '@/types/supabase';
 import { TrendingUp, Clock } from 'lucide-react';
 
@@ -65,17 +65,7 @@ export default async function Home() {
     <div className="max-w-6xl mx-auto px-6 py-12 space-y-16">
       {/* Trending Section */}
       {trendingPosts.length > 0 && (posts.some(p => (p.view_count || 0) > 0)) && (
-        <section className="space-y-6">
-          <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-            <TrendingUp className="w-5 h-5 text-red-500" />
-            <h2 className="text-xl font-bold tracking-tight text-gray-900">Trending</h2>
-          </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {trendingPosts.map((post) => (
-              <TrendingPostItem key={`trending-${post.id}`} post={post} />
-            ))}
-          </div>
-        </section>
+        <TrendingSection posts={trendingPosts} />
       )}
 
       {/* Latest Section */}
