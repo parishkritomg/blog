@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { TrendingPostItem } from '@/components/blog/TrendingPostItem';
 import { Database } from '@/types/supabase';
 import { TrendingUp } from 'lucide-react';
@@ -15,7 +15,8 @@ export function TrendingSection({ posts }: TrendingSectionProps) {
   // Duplicate posts for seamless marquee loop (4 sets to be safe)
   const marqueePosts = [...posts, ...posts, ...posts, ...posts]; 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [isPaused, setIsPaused] = useState(false);
+  const isPaused = useRef(false);
+  const scrollAccumulator = useRef(0);
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;
@@ -23,15 +24,27 @@ export function TrendingSection({ posts }: TrendingSectionProps) {
 
     let animationFrameId: number;
 
+    // Initialize accumulator with current scroll position
+    scrollAccumulator.current = scrollContainer.scrollLeft;
+
     const scroll = () => {
-      if (!isPaused && scrollContainer) {
-        // Slow speed: 0.5px per frame (approx 30px per second at 60fps)
-        scrollContainer.scrollLeft += 0.5;
+      if (!scrollContainer) return;
+
+      if (isPaused.current) {
+        // When paused, sync accumulator with actual scroll position
+        // This ensures when we resume, we start from where the user dragged it
+        scrollAccumulator.current = scrollContainer.scrollLeft;
+      } else {
+        // Increment accumulator
+        // Speed: 0.5px per frame (approx 30px/sec at 60fps)
+        scrollAccumulator.current += 0.5;
+
+        // Apply to scrollLeft
+        scrollContainer.scrollLeft = scrollAccumulator.current;
 
         // Check for wrap-around
-        // We wrap when we've scrolled past half the total content width
-        // This assumes the content consists of two identical halves (which 4 sets provides: 2 sets + 2 sets)
         if (scrollContainer.scrollLeft >= scrollContainer.scrollWidth / 2) {
+          scrollAccumulator.current = 0;
           scrollContainer.scrollLeft = 0;
         }
       }
@@ -41,7 +54,7 @@ export function TrendingSection({ posts }: TrendingSectionProps) {
     animationFrameId = requestAnimationFrame(scroll);
 
     return () => cancelAnimationFrame(animationFrameId);
-  }, [isPaused]);
+  }, []);
 
   return (
     <section className="space-y-6">
@@ -61,11 +74,12 @@ export function TrendingSection({ posts }: TrendingSectionProps) {
       <div className="md:hidden -mx-6">
         <div 
           ref={scrollRef}
-          className="flex gap-4 px-6 overflow-x-auto scrollbar-hide"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setIsPaused(false)}
+          className="flex gap-4 px-6 overflow-x-auto scrollbar-hide touch-pan-x"
+          onPointerDown={() => { isPaused.current = true; }}
+          onPointerUp={() => { isPaused.current = false; }}
+          onPointerLeave={() => { isPaused.current = false; }}
+          onTouchStart={() => { isPaused.current = true; }}
+          onTouchEnd={() => { isPaused.current = false; }}
         >
           {marqueePosts.map((post, index) => (
             <div key={`trending-mobile-${post.id}-${index}`} className="w-[85vw] flex-shrink-0">
