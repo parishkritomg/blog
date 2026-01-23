@@ -19,7 +19,7 @@ export async function Header() {
           <AnimatedLogo />
         </Link>
         <nav className="flex items-center gap-4">
-          <Suspense>
+          <Suspense> 
             <Search />
           </Suspense>
           {user ? (
