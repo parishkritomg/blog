@@ -17,6 +17,20 @@ export function TrendingSection({ posts }: TrendingSectionProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isPaused = useRef(false);
   const scrollAccumulator = useRef(0);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const pauseScroll = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    isPaused.current = true;
+  };
+
+  const resumeScroll = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    // Wait 2 seconds before resuming to allow momentum scrolling to settle
+    timeoutRef.current = setTimeout(() => {
+      isPaused.current = false;
+    }, 2000);
+  };
 
   useEffect(() => {
     const scrollContainer = scrollRef.current;
@@ -53,7 +67,10 @@ export function TrendingSection({ posts }: TrendingSectionProps) {
 
     animationFrameId = requestAnimationFrame(scroll);
 
-    return () => cancelAnimationFrame(animationFrameId);
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, []);
 
   return (
@@ -75,11 +92,11 @@ export function TrendingSection({ posts }: TrendingSectionProps) {
         <div 
           ref={scrollRef}
           className="flex gap-4 px-6 overflow-x-auto scrollbar-hide touch-pan-x"
-          onPointerDown={() => { isPaused.current = true; }}
-          onPointerUp={() => { isPaused.current = false; }}
-          onPointerLeave={() => { isPaused.current = false; }}
-          onTouchStart={() => { isPaused.current = true; }}
-          onTouchEnd={() => { isPaused.current = false; }}
+          onPointerDown={pauseScroll}
+          onPointerUp={resumeScroll}
+          onPointerLeave={resumeScroll}
+          onTouchStart={pauseScroll}
+          onTouchEnd={resumeScroll}
         >
           {marqueePosts.map((post, index) => (
             <div key={`trending-mobile-${post.id}-${index}`} className="w-[85vw] flex-shrink-0">
