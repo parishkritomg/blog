@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { createClient } from '@/lib/supabase/server';
 import { UserMenu } from './UserMenu';
 import { Search } from './Search';
 import { Suspense } from 'react';
+import { AnimatedLogo } from './AnimatedLogo';
 
 export async function Header() {
   const supabase = await createClient();
@@ -14,16 +14,9 @@ export async function Header() {
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <Link 
           href="/" 
-          className="flex items-center gap-2 text-lg font-medium tracking-tight hover:text-gray-600 transition-colors duration-200"
+          className="hover:text-gray-600 transition-colors duration-200"
         >
-          <Image
-            src="/favicon_me.png"
-            alt="Logo"
-            width={24}
-            height={24}
-            className="rounded-full"
-          />
-          Parishkrit Writes
+          <AnimatedLogo />
         </Link>
         <nav className="flex items-center gap-4">
           <Suspense>
