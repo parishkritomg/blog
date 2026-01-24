@@ -137,23 +137,7 @@ export async function GET(request: Request) {
                   {title}
                 </div>
 
-                {/* Excerpt */}
-                {excerpt && (
-                  <div
-                    style={{
-                      fontSize: 28,
-                      color: '#525252',
-                      lineHeight: 1.5,
-                      fontFamily: 'sans-serif',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {excerpt}
-                  </div>
-                )}
+                {/* Excerpt removed as per user request */}
               </div>
 
               {/* Author Footer */}
