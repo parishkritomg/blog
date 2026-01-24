@@ -15,6 +15,24 @@ export async function GET(request: Request) {
     // If it's already absolute, new URL() handles it. If relative, it uses request.url as base.
     const image = imageParam ? new URL(imageParam, request.url).toString() : null;
 
+    // Fetch featured image to ArrayBuffer
+    let imageBuffer: ArrayBuffer | null = null;
+    if (image) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout for main image
+        const res = await fetch(image, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          imageBuffer = await res.arrayBuffer();
+        } else {
+            console.error('Failed to fetch featured image:', res.status);
+        }
+      } catch (e) {
+        console.error('Error fetching featured image:', e);
+      }
+    }
+
     // Load avatar image
     // We fetch it and convert to ArrayBuffer for Satori
     // We use the deployment URL or fallback to the site URL
@@ -184,7 +202,7 @@ export async function GET(request: Request) {
             </div>
 
             {/* Right Column: Floating Image */}
-            {image && (
+            {imageBuffer && (
               <div
                 style={{
                   width: '45%',
@@ -197,7 +215,7 @@ export async function GET(request: Request) {
                 {/* The Image */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={image}
+                  src={imageBuffer as any}
                   alt={title}
                   style={{
                     width: '100%',
