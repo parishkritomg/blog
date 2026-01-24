@@ -107,7 +107,7 @@ export async function GET(request: Request) {
                     padding: '6px 12px',
                     backgroundColor: '#f3f4f6',
                     borderRadius: '100px',
-                    width: 'fit-content',
+                    // width: 'fit-content', // This causes "Invalid value fit-content for setWidth"
                   }}
                 >
                   <span
