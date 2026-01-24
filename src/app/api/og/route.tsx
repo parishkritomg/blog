@@ -45,59 +45,123 @@ export async function GET(request: Request) {
             height: '100%',
             width: '100%',
             display: 'flex',
-            backgroundColor: '#ffffff',
+            flexDirection: 'column',
+            backgroundColor: '#09090b', // zinc-950
+            position: 'relative',
           }}
         >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              width: image ? '60%' : '100%',
-              padding: '60px',
-              backgroundColor: '#ffffff',
-            }}
-          >
-            {/* Header / Brand */}
+          {/* Background Image or Pattern */}
+          {image ? (
+            <img
+              src={image}
+              alt="Background"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                opacity: 0.8,
+              }}
+            />
+          ) : (
             <div
               style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                backgroundImage: 'linear-gradient(to bottom right, #18181b, #000000)',
+                display: 'flex',
+              }}
+            />
+          )}
+
+          {/* Gradient Overlay for readability */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.95) 90%)',
+            }}
+          />
+
+          {/* Content Container */}
+          <div
+            style={{
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'flex-end',
+              height: '100%',
+              width: '100%',
+              padding: '60px 80px', // More horizontal padding
+            }}
+          >
+            {/* Top Brand Tag */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '60px',
+                left: '80px',
                 display: 'flex',
                 alignItems: 'center',
-                fontSize: 16,
-                fontWeight: 600,
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                color: '#000',
+                gap: '12px',
               }}
             >
-              Parishkrit Bastakoti
-            </div>
-
-            {/* Main Content */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div
                 style={{
-                  fontSize: 64,
+                  padding: '8px 16px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  backdropFilter: 'blur(10px)',
+                  borderRadius: '100px',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: 'white',
+                  fontSize: 14,
+                  fontWeight: 600,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Parishkrit Bastakoti
+              </div>
+            </div>
+
+            {/* Main Title Area */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '48px' }}>
+              <div
+                style={{
+                  fontSize: 72,
                   fontWeight: 900,
-                  color: '#000',
-                  lineHeight: 1.1,
+                  color: 'white',
+                  lineHeight: 1.05,
                   letterSpacing: '-0.03em',
                   fontFamily: 'sans-serif',
+                  textShadow: '0 4px 20px rgba(0,0,0,0.5)',
                 }}
               >
                 {title}
               </div>
+              
               {excerpt && (
                 <div
                   style={{
-                    fontSize: 28,
-                    color: '#525252',
-                    lineHeight: 1.5,
+                    fontSize: 32,
+                    color: '#e5e7eb', // gray-200
+                    lineHeight: 1.4,
                     fontFamily: 'sans-serif',
+                    maxWidth: '90%',
                     display: '-webkit-box',
-                    WebkitLineClamp: 3,
+                    WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical',
                     overflow: 'hidden',
+                    textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+                    opacity: 0.9,
                   }}
                 >
                   {excerpt}
@@ -105,11 +169,14 @@ export async function GET(request: Request) {
               )}
             </div>
 
-            {/* Author Footer */}
+            {/* Bottom Footer */}
             <div
                 style={{
                     display: 'flex',
                     alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderTop: '1px solid rgba(255,255,255,0.2)',
+                    paddingTop: '32px',
                 }}
             >
                 <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -119,26 +186,26 @@ export async function GET(request: Request) {
                           src={avatarBuffer as any}
                           alt="Parishkrit Bastakoti"
                           style={{ 
-                              width: '48px', 
-                              height: '48px', 
+                              width: '56px', 
+                              height: '56px', 
                               borderRadius: '50%', 
-                              marginRight: '16px',
-                              border: '2px solid #f3f4f6',
+                              marginRight: '20px',
+                              border: '2px solid rgba(255,255,255,0.8)',
                           }} 
                       />
                     ) : (
                       <div
                         style={{
-                          width: '48px',
-                          height: '48px',
+                          width: '56px',
+                          height: '56px',
                           borderRadius: '50%',
-                          backgroundColor: '#000',
-                          color: '#fff',
+                          backgroundColor: '#fff',
+                          color: '#000',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          marginRight: '16px',
-                          fontSize: '20px',
+                          marginRight: '20px',
+                          fontSize: '24px',
                           fontWeight: 'bold',
                         }}
                       >
@@ -146,37 +213,32 @@ export async function GET(request: Request) {
                       </div>
                     )}
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ fontSize: 20, fontWeight: '700', color: '#000' }}>
+                        <div style={{ fontSize: 24, fontWeight: '700', color: 'white' }}>
                             Parishkrit Bastakoti
                         </div>
-                        <div style={{ fontSize: 16, color: '#6b7280', marginTop: '4px' }}>
+                        <div style={{ fontSize: 16, color: '#d1d5db', marginTop: '4px', fontWeight: 500 }}>
                             blog.parishkrit.com.np
                         </div>
                     </div>
                 </div>
+
+                {/* Optional "Read Post" visual cue */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    backgroundColor: 'white',
+                    padding: '12px 24px',
+                    borderRadius: '100px',
+                    color: 'black',
+                    fontSize: 18,
+                    fontWeight: 700,
+                  }}
+                >
+                  Read Post &rarr;
+                </div>
             </div>
           </div>
-          
-          {image && (
-            <div
-              style={{
-                width: '40%',
-                height: '100%',
-                display: 'flex',
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={image}
-                alt={title}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                }}
-              />
-            </div>
-          )}
         </div>
       ),
       {
