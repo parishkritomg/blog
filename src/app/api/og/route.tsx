@@ -46,8 +46,6 @@ export async function GET(request: Request) {
             width: '100%',
             display: 'flex',
             backgroundColor: '#ffffff',
-            // Simple linear gradient is safer than radial
-            backgroundImage: 'linear-gradient(to bottom right, #ffffff, #f3f4f6)',
             position: 'relative',
           }}
         >
@@ -207,7 +205,6 @@ export async function GET(request: Request) {
                     objectFit: 'cover',
                     borderRadius: '24px',
                     backgroundColor: '#f3f4f6',
-                    boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
                   }}
                 />
               </div>
