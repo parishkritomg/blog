@@ -99,30 +99,8 @@ export async function GET(request: Request) {
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {/* Brand Pill */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '6px 12px',
-                    backgroundColor: '#f3f4f6',
-                    borderRadius: '100px',
-                    // width: 'fit-content', // This causes "Invalid value fit-content for setWidth"
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 700,
-                      letterSpacing: '0.05em',
-                      textTransform: 'uppercase',
-                      color: '#000',
-                    }}
-                  >
-                    Parishkrit Bastakoti
-                  </span>
-                </div>
-
+                {/* Brand Pill Removed */}
+                
                 {/* Title */}
                 <div
                   style={{
