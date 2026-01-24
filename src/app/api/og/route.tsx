@@ -46,7 +46,8 @@ export async function GET(request: Request) {
             width: '100%',
             display: 'flex',
             backgroundColor: '#ffffff',
-            backgroundImage: 'radial-gradient(circle at 0% 0%, #f3f4f6 0%, #ffffff 50%)',
+            // Simple linear gradient is safer than radial
+            backgroundImage: 'linear-gradient(to bottom right, #ffffff, #f3f4f6)',
             position: 'relative',
           }}
         >
@@ -193,23 +194,8 @@ export async function GET(request: Request) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  position: 'relative',
                 }}
               >
-                {/* Shadow Element (Simulated) */}
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: '20px',
-                        left: '20px',
-                        right: '-10px',
-                        bottom: '-10px',
-                        backgroundColor: 'rgba(0,0,0,0.1)',
-                        borderRadius: '24px',
-                        filter: 'blur(20px)',
-                    }}
-                />
-                
                 {/* The Image */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -220,8 +206,8 @@ export async function GET(request: Request) {
                     height: '100%',
                     objectFit: 'cover',
                     borderRadius: '24px',
-                    border: '1px solid rgba(0,0,0,0.05)',
-                    backgroundColor: '#f3f4f6', // Fallback
+                    backgroundColor: '#f3f4f6',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
                   }}
                 />
               </div>
