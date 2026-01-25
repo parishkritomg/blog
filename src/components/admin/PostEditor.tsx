@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Database } from '@/types/supabase';
 import { RichTextEditor } from './RichTextEditor';
 import { format } from 'date-fns';
-import { Eye, Send, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
+import { Eye, Send, ChevronDown, ChevronUp, Plus, Trash2, Settings, X, Calendar, MapPin, Globe, ImageIcon, Tag } from 'lucide-react';
 
 type Post = Database['public']['Tables']['posts']['Row'];
 
@@ -67,6 +67,7 @@ export function PostEditor({ post, initialPoll }: PostEditorProps) {
 
   // UI State
   const [showOptions, setShowOptions] = useState(true);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const addPollOption = () => {
     setPollOptions([...pollOptions, { id: Date.now().toString(), text: '' }]);
@@ -191,36 +192,47 @@ export function PostEditor({ post, initialPoll }: PostEditorProps) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-65px)] bg-gray-50 overflow-hidden">
+    <div className="flex flex-col h-screen bg-gray-50/50 overflow-hidden">
       {/* Top Bar */}
-      <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200">
-        <h1 className="text-xl font-semibold text-gray-800">
-          {post ? 'Edit Post' : 'New Post'}
-        </h1>
+      <div className="flex items-center justify-between px-4 md:px-6 py-3 bg-white border-b border-gray-200 shadow-sm z-20">
         <div className="flex items-center gap-3">
+          <h1 className="text-lg md:text-xl font-bold tracking-tight text-gray-900">
+            {post ? 'Edit Post' : 'New Post'}
+          </h1>
+        </div>
+        
+        <div className="flex items-center gap-2 md:gap-3">
           <button 
             type="button"
             onClick={handlePreview}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+            className="flex items-center gap-2 px-3 md:px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
           >
             <Eye size={16} />
-            Preview
+            <span className="hidden md:inline">Preview</span>
           </button>
           <button 
             type="button"
             onClick={() => handleSubmit(null, true)}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-black rounded hover:bg-gray-800 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-3 md:px-4 py-2 text-sm font-medium text-white bg-black rounded hover:bg-gray-800 transition-colors shadow-sm"
           >
             <Send size={16} />
-            {loading ? 'Publishing...' : 'Publish'}
+            <span className="hidden md:inline">{loading ? 'Publishing...' : 'Publish'}</span>
+            <span className="md:hidden">{loading ? '...' : 'Publish'}</span>
+          </button>
+          <button 
+            type="button"
+            onClick={() => setIsSettingsOpen(true)}
+            className="p-2 text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 lg:hidden"
+          >
+            <Settings size={20} />
           </button>
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col p-8 overflow-y-auto">
+        <div className="flex-1 flex flex-col p-4 md:p-8 overflow-y-auto w-full">
           {error && (
             <div className="mb-6 bg-red-50 text-red-700 p-4 text-sm rounded border border-red-200">
               {error}
@@ -232,7 +244,7 @@ export function PostEditor({ post, initialPoll }: PostEditorProps) {
             value={title}
             onChange={handleTitleChange}
             placeholder="Title"
-            className="text-4xl font-bold text-gray-900 placeholder-gray-300 border-none outline-none bg-transparent mb-6 w-full"
+            className="text-3xl md:text-4xl font-bold text-gray-900 placeholder-gray-300 border-none outline-none bg-transparent mb-6 w-full"
           />
 
           <div className="flex-1 min-h-[500px]">
@@ -243,18 +255,40 @@ export function PostEditor({ post, initialPoll }: PostEditorProps) {
           </div>
         </div>
 
+        {/* Sidebar Overlay (Mobile) */}
+        {isSettingsOpen && (
+          <div 
+            className="fixed inset-0 bg-black/20 z-30 lg:hidden backdrop-blur-sm" 
+            onClick={() => setIsSettingsOpen(false)} 
+          />
+        )}
+
         {/* Sidebar */}
-        <div className="w-80 bg-white border-l border-gray-200 overflow-y-auto flex flex-col">
+        <div className={`
+          fixed inset-y-0 right-0 w-80 bg-white border-l border-gray-200 shadow-2xl transform transition-transform duration-300 z-40
+          lg:relative lg:transform-none lg:shadow-none lg:border-l lg:z-0 lg:flex flex-col overflow-y-auto
+          ${isSettingsOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'}
+        `}>
+          <div className="flex items-center justify-between p-4 border-b border-gray-100 lg:hidden">
+            <h2 className="text-lg font-bold text-gray-900">Settings</h2>
+            <button onClick={() => setIsSettingsOpen(false)} className="text-gray-500 hover:text-gray-900">
+              <X size={20} />
+            </button>
+          </div>
+
           <div className="p-6 space-y-8">
             {/* Post Settings Header */}
-            <div>
+            <div className="hidden lg:block">
               <h2 className="text-lg font-medium text-gray-900 mb-1">Post settings</h2>
             </div>
 
             {/* Featured Image */}
             <div className="space-y-2">
-              <button className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-orange-500">
-                <span>Featured Image</span>
+              <button className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-orange-500 group">
+                <div className="flex items-center gap-2">
+                  <ImageIcon size={16} className="text-gray-400 group-hover:text-orange-500" />
+                  <span>Featured Image</span>
+                </div>
                 <ChevronUp size={16} className="text-gray-400" />
               </button>
               <div className="pt-2">
@@ -270,8 +304,11 @@ export function PostEditor({ post, initialPoll }: PostEditorProps) {
 
             {/* Labels */}
             <div className="space-y-2">
-              <button className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-orange-500">
-                <span>Labels</span>
+              <button className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-orange-500 group">
+                <div className="flex items-center gap-2">
+                  <Tag size={16} className="text-gray-400 group-hover:text-orange-500" />
+                  <span>Labels</span>
+                </div>
                 <ChevronUp size={16} className="text-gray-400" />
               </button>
               <div className="pt-2">
@@ -287,8 +324,11 @@ export function PostEditor({ post, initialPoll }: PostEditorProps) {
 
             {/* Published On */}
             <div className="space-y-2 border-t border-gray-100 pt-4">
-              <button className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-orange-500">
-                <span>Published on</span>
+              <button className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-orange-500 group">
+                <div className="flex items-center gap-2">
+                  <Calendar size={16} className="text-gray-400 group-hover:text-orange-500" />
+                  <span>Published on</span>
+                </div>
                 <ChevronDown size={16} className="text-gray-400" />
               </button>
               <div className="pt-2">
@@ -306,8 +346,11 @@ export function PostEditor({ post, initialPoll }: PostEditorProps) {
 
             {/* Permalink */}
             <div className="space-y-2 border-t border-gray-100 pt-4">
-              <button className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-orange-500">
-                <span>Permalink</span>
+              <button className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 hover:text-orange-500 group">
+                <div className="flex items-center gap-2">
+                  <Globe size={16} className="text-gray-400 group-hover:text-orange-500" />
+                  <span>Permalink</span>
+                </div>
                 <ChevronDown size={16} className="text-gray-400" />
               </button>
               <div className="pt-2">
@@ -322,8 +365,11 @@ export function PostEditor({ post, initialPoll }: PostEditorProps) {
 
             {/* Location (Placeholder) */}
             <div className="space-y-2 border-t border-gray-100 pt-4 opacity-50">
-              <button className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 cursor-not-allowed">
-                <span>Location</span>
+              <button className="flex items-center justify-between w-full text-left text-sm font-medium text-gray-700 cursor-not-allowed group">
+                <div className="flex items-center gap-2">
+                  <MapPin size={16} className="text-gray-400 group-hover:text-orange-500" />
+                  <span>Location</span>
+                </div>
                 <ChevronDown size={16} className="text-gray-400" />
               </button>
             </div>
