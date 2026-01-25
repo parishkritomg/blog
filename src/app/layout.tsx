@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
-import { AnnouncementBar } from "@/components/layout/AnnouncementBar";
-import { SitePopup } from "@/components/layout/SitePopup";
-import { VisitorTracker } from "@/components/layout/VisitorTracker";
-
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -21,15 +15,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')),
   title: {
-    default: "Parishkrit Bastakoti | Blog",
-    template: "%s | Parishkrit Bastakoti",
+    default: "Parishkrit Writes",
+    template: "%s | Parishkrit Writes",
   },
   description: "Personal blog of Parishkrit Bastakoti. Thoughts on software, design, and life.",
   openGraph: {
-    title: "Parishkrit Bastakoti",
+    title: "Parishkrit Writes",
     description: "Personal blog of Parishkrit Bastakoti.",
     url: "https://blog.parishkrit.com.np", // Placeholder
-    siteName: "Parishkrit Bastakoti",
+    siteName: "Parishkrit Writes",
     locale: "en_US",
     type: "website",
   },
@@ -42,7 +36,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Parishkrit Bastakoti | Blog',
+    title: 'Parishkrit Writes',
     description: 'Personal blog of Parishkrit Bastakoti. Thoughts on software, design, and life.',
     images: ['https://blog.parishkrit.com.np/favicon_me.png'],
   },
@@ -58,14 +52,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
-        <VisitorTracker />
-        <SitePopup />
-        <AnnouncementBar />
-        <Header />
-        <main className="flex-1 w-full">
-          {children}
-        </main>
-        <Footer />
+        {children}
       </body>
     </html>
   );
