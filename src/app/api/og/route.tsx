@@ -99,8 +99,6 @@ export async function GET(request: Request) {
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                {/* Brand Pill Removed */}
-                
                 {/* Title */}
                 <div
                   style={{
@@ -114,8 +112,6 @@ export async function GET(request: Request) {
                 >
                   {title}
                 </div>
-
-                {/* Excerpt removed as per user request */}
               </div>
 
               {/* Author Footer */}
@@ -157,7 +153,7 @@ export async function GET(request: Request) {
                     Parishkrit Bastakoti
                   </div>
                   <div style={{ fontSize: 14, color: '#6b7280', fontWeight: 500 }}>
-                    @parishkrit2061
+                    @notparishkrit
                   </div>
                 </div>
               </div>
