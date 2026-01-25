@@ -84,28 +84,41 @@ export function AdminStats() {
   }, [supabase]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex items-center justify-between">
-        <div>
-          <p className="text-sm text-gray-500 font-medium mb-1">Total Site Visitors</p>
-          <h3 className="text-3xl font-bold tracking-tight" title={totalVisitors.toLocaleString()}>
-            {formatViewCount(totalVisitors)}
-          </h3>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden group hover:border-gray-200 transition-colors">
+        <div className="flex justify-between items-start z-10">
+          <div>
+            <p className="text-sm text-gray-500 font-medium mb-1">Total Visitors</p>
+            <h3 className="text-3xl font-bold tracking-tight text-gray-900" title={totalVisitors.toLocaleString()}>
+              {formatViewCount(totalVisitors)}
+            </h3>
+          </div>
+          <div className="p-2 bg-blue-50 text-blue-600 rounded-lg group-hover:scale-110 transition-transform">
+            <Users className="w-5 h-5" />
+          </div>
         </div>
-        <div className="p-3 bg-black/5 rounded-full">
-          <Users className="w-6 h-6 text-black" />
-        </div>
+        <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-blue-50 rounded-full opacity-50 blur-2xl group-hover:opacity-75 transition-opacity" />
       </div>
 
-      <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm flex items-center justify-between">
-        <div>
-          <p className="text-sm text-gray-500 font-medium mb-1">Total Post Views</p>
-          <h3 className="text-3xl font-bold tracking-tight" title={totalPostViews.toLocaleString()}>
-            {formatViewCount(totalPostViews)}
-          </h3>
+      <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden group hover:border-gray-200 transition-colors">
+        <div className="flex justify-between items-start z-10">
+          <div>
+            <p className="text-sm text-gray-500 font-medium mb-1">Total Views</p>
+            <h3 className="text-3xl font-bold tracking-tight text-gray-900" title={totalPostViews.toLocaleString()}>
+              {formatViewCount(totalPostViews)}
+            </h3>
+          </div>
+          <div className="p-2 bg-green-50 text-green-600 rounded-lg group-hover:scale-110 transition-transform">
+            <Eye className="w-5 h-5" />
+          </div>
         </div>
-        <div className="p-3 bg-black/5 rounded-full">
-          <Eye className="w-6 h-6 text-black" />
+        <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-green-50 rounded-full opacity-50 blur-2xl group-hover:opacity-75 transition-opacity" />
+      </div>
+
+      {/* Placeholder for future stat, e.g., Total Posts or Comments */}
+      <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden group hover:border-gray-200 transition-colors border-dashed bg-gray-50/50">
+        <div className="flex items-center justify-center h-full text-gray-400 text-sm font-medium">
+          More stats coming soon
         </div>
       </div>
     </div>
